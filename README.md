@@ -20,8 +20,8 @@ To compare a baseline recommendation model with a hybrid model that combines pre
 
 ## How to Run
 
-1. Install dependencies:
-   pip3 install pandas numpy
+1. Install dependencies:<br>
+   pip3 install pandas numpy<br>
 
-2. Run the code:
+2. Run the code:<br>
    python3 main.py
