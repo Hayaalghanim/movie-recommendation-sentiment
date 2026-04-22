@@ -1,5 +1,7 @@
 import pandas as pd
 from src.preprocessing import preprocess_tweets, encode_sentiment
+from src.recommender import create_baseline_predictions
+from src.evaluation import calculate_rmse, calculate_mae
 
 def main():
     print("Loading datasets...")
@@ -30,6 +32,19 @@ def main():
 
     print("\nSentiment encoding preview:")
     print(tweets_train[["sentiment", "sentiment_score"]].head())
+
+    baseline = create_baseline_predictions(ratings)
+
+    print("\nBaseline preview:")
+    print(baseline[["userId", "movieId", "rating", "predicted_rating"]].head())
+
+    # Calculate evaluation metrics
+    rmse = calculate_rmse(baseline["rating"], baseline["predicted_rating"])
+    mae = calculate_mae(baseline["rating"], baseline["predicted_rating"])
+ 
+    print("\nEvaluation Results:")
+    print("RMSE:", rmse)
+    print("MAE:", mae)
 
 if __name__ == "__main__":
     main()
