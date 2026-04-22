@@ -17,3 +17,11 @@ This project implements a movie recommendation system that combines collaborativ
 ## Goal
 
 To compare a baseline recommendation model with a hybrid model that combines predicted ratings and sentiment scores.
+
+## How to Run
+
+1. Install dependencies:
+   pip3 install pandas numpy
+
+2. Run the code:
+   python3 main.py
