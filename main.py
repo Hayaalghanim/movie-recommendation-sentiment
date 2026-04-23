@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from src.preprocessing import preprocess_tweets, encode_sentiment
 from src.recommender import create_baseline_predictions
@@ -45,6 +46,19 @@ def main():
     print("\nEvaluation Results:")
     print("RMSE:", rmse)
     print("MAE:", mae)
+    
+    # Create results folder
+    os.makedirs("results", exist_ok=True)
+
+    # Save predictions
+    baseline.to_csv("results/baseline_predictions.csv", index=False)
+
+    # Save metrics
+    with open("results/metrics.txt", "w") as f:
+        f.write(f"RMSE: {rmse:.4f}\n")
+        f.write(f"MAE: {mae:.4f}\n")
+
+    print("\nResults saved in results/ folder.")
 
 if __name__ == "__main__":
     main()
