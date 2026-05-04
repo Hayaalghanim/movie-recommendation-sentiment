@@ -1,0 +1,18 @@
+Evaluation Results
+==================
+
+Baseline RMSE: 0.8762
+Baseline MAE: 0.6668
+
+Hybrid alpha=0.2
+RMSE: 1.0644
+MAE: 0.8711
+
+Hybrid alpha=0.5
+RMSE: 0.9541
+MAE: 0.7714
+
+Hybrid alpha=0.8
+RMSE: 0.8891
+MAE: 0.6956
+
