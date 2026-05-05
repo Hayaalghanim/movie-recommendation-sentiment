@@ -2,9 +2,6 @@ import pandas as pd
 
 
 def create_baseline_predictions(ratings: pd.DataFrame) -> pd.DataFrame:
-    """
-    Create baseline predicted ratings using the average rating of each movie.
-    """
     movie_avg = ratings.groupby("movieId")["rating"].mean().reset_index()
     movie_avg.columns = ["movieId", "predicted_rating"]
 
@@ -12,35 +9,71 @@ def create_baseline_predictions(ratings: pd.DataFrame) -> pd.DataFrame:
     return baseline
 
 
-def map_sentiment_to_rating_scale(sentiment_score):
-    """
-    Convert sentiment score to rating scale:
-    -1 -> 1
-     0 -> 3
-     1 -> 5
-    """
-    mapping = {
-        -1: 1,
-        0: 3,
-        1: 5
-    }
-    return mapping.get(sentiment_score, 3)
+def clean_movie_title(title: str) -> str:
+    return (
+        str(title)
+        .replace("&", "and")
+        .lower()
+        .strip()
+    )
 
 
-def create_hybrid_predictions(baseline: pd.DataFrame, sentiment_score: float, alpha: float) -> pd.DataFrame:
-    """
-    Create hybrid predictions using:
-    FinalScore = alpha * PredictedRating + (1 - alpha) * SentimentScore
-    """
-    hybrid = baseline.copy()
+def add_movie_specific_sentiment(
+    baseline: pd.DataFrame,
+    movies: pd.DataFrame,
+    tweets: pd.DataFrame
+) -> pd.DataFrame:
+    movies = movies.copy()
+    tweets = tweets.copy()
 
-    sentiment_rating = map_sentiment_to_rating_scale(sentiment_score)
+    # Remove year from MovieLens title, example: Toy Story (1995) -> Toy Story
+    movies["clean_title"] = (
+        movies["title"]
+        .str.replace(r"\s*\(\d{4}\)", "", regex=True)
+        .apply(clean_movie_title)
+    )
 
-    hybrid["sentiment_rating"] = sentiment_rating
+    tweets["clean_entity"] = tweets["entity"].apply(clean_movie_title)
+
+    # Average sentiment per movie/entity
+    movie_sentiment = (
+        tweets.groupby("clean_entity")["sentiment_score"]
+        .mean()
+        .reset_index()
+    )
+
+    movie_sentiment.columns = ["clean_title", "avg_sentiment_score"]
+
+    # Match sentiment with MovieLens movies
+    movies_with_sentiment = movies.merge(
+        movie_sentiment,
+        on="clean_title",
+        how="left"
+    )
+
+    # Merge movie sentiment into baseline predictions
+    hybrid_data = baseline.merge(
+        movies_with_sentiment[["movieId", "avg_sentiment_score"]],
+        on="movieId",
+        how="left"
+    )
+
+    # If no tweet sentiment exists for a movie, use neutral sentiment
+    hybrid_data["avg_sentiment_score"] = hybrid_data["avg_sentiment_score"].fillna(0)
+
+    # Convert sentiment scale from [-1, 1] to rating scale [1, 5]
+    hybrid_data["sentiment_rating"] = 3 + (hybrid_data["avg_sentiment_score"] * 2)
+
+    return hybrid_data
+
+
+def create_hybrid_predictions(hybrid_data: pd.DataFrame, alpha: float) -> pd.DataFrame:
+    hybrid = hybrid_data.copy()
+
     hybrid["alpha"] = alpha
     hybrid["hybrid_prediction"] = (
-        alpha * hybrid["predicted_rating"] +
-        (1 - alpha) * hybrid["sentiment_rating"]
+        alpha * hybrid["predicted_rating"]
+        + (1 - alpha) * hybrid["sentiment_rating"]
     )
 
     return hybrid
