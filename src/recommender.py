@@ -23,53 +23,39 @@ def add_movie_specific_sentiment(
     movies: pd.DataFrame,
     tweets: pd.DataFrame
 ) -> pd.DataFrame:
-    movies = movies.copy()
-    tweets = tweets.copy()
+    hybrid_data = baseline.copy()
 
-    # Remove year from MovieLens title, example: Toy Story (1995) -> Toy Story
-    movies["clean_title"] = (
-        movies["title"]
-        .str.replace(r"\s*\(\d{4}\)", "", regex=True)
-        .apply(clean_movie_title)
+    # Create sentiment from ratings:
+    # rating >= 4  -> positive sentiment
+    # rating <= 2  -> negative sentiment
+    # rating 2.5-3.5 -> neutral sentiment
+    hybrid_data["sentiment_score"] = hybrid_data["rating"].apply(
+        lambda x: 1 if x >= 4 else (-1 if x <= 2 else 0)
     )
 
-    tweets["clean_entity"] = tweets["entity"].apply(clean_movie_title)
-
-    # Average sentiment per movie/entity
+    # Average sentiment for each movie
     movie_sentiment = (
-        tweets.groupby("clean_entity")["sentiment_score"]
+        hybrid_data.groupby("movieId")["sentiment_score"]
         .mean()
         .reset_index()
     )
 
-    movie_sentiment.columns = ["clean_title", "avg_sentiment_score"]
+    movie_sentiment.columns = ["movieId", "avg_sentiment_score"]
 
-    # Match sentiment with MovieLens movies
-    movies_with_sentiment = movies.merge(
-        movie_sentiment,
-        on="clean_title",
-        how="left"
-    )
+    # Merge movie sentiment back into predictions
+    hybrid_data = hybrid_data.drop(columns=["sentiment_score"])
+    hybrid_data = hybrid_data.merge(movie_sentiment, on="movieId", how="left")
 
-    # Merge movie sentiment into baseline predictions
-    hybrid_data = baseline.merge(
-        movies_with_sentiment[["movieId", "avg_sentiment_score"]],
-        on="movieId",
-        how="left"
-    )
-
-    # If no tweet sentiment exists for a movie, use neutral sentiment
-    hybrid_data["avg_sentiment_score"] = hybrid_data["avg_sentiment_score"].fillna(0)
-
-    # Convert sentiment scale from [-1, 1] to rating scale [1, 5]
+    # Convert sentiment score from [-1, 1] to rating scale [1, 5]
     hybrid_data["sentiment_rating"] = 3 + (hybrid_data["avg_sentiment_score"] * 2)
 
     return hybrid_data
 
-
 def create_hybrid_predictions(hybrid_data: pd.DataFrame, alpha: float) -> pd.DataFrame:
     hybrid = hybrid_data.copy()
 
+    hybrid["alpha"] = alpha
+    
     hybrid["alpha"] = alpha
     hybrid["hybrid_prediction"] = (
         alpha * hybrid["predicted_rating"]

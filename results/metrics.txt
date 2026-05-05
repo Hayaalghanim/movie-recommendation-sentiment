@@ -5,14 +5,14 @@ Baseline RMSE: 0.8762
 Baseline MAE: 0.6668
 
 Hybrid alpha=0.2
-RMSE: 1.0644
-MAE: 0.8711
+RMSE: 0.9100
+MAE: 0.6941
 
 Hybrid alpha=0.5
-RMSE: 0.9541
-MAE: 0.7714
+RMSE: 0.8895
+MAE: 0.6774
 
 Hybrid alpha=0.8
-RMSE: 0.8891
-MAE: 0.6956
+RMSE: 0.8783
+MAE: 0.6683
 

@@ -66,7 +66,7 @@ def main():
     hybrid_data = add_movie_specific_sentiment(baseline, movies, tweets_train)
 
     print("\nHybrid data preview:")
-    print(hybrid_data[["movieId", "rating", "predicted_rating", "avg_sentiment_score", "sentiment_rating"]].head())
+    print(hybrid_data[["movieId", "rating", "predicted_rating", "avg_sentiment_score"]].head())
 
     # Test hybrid model with different alpha values
     alpha_values = [0.2, 0.5, 0.8]
