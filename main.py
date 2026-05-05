@@ -2,7 +2,11 @@ import os
 import pandas as pd
 
 from src.preprocessing import preprocess_tweets, encode_sentiment
-from src.recommender import create_baseline_predictions, create_hybrid_predictions
+from src.recommender import (
+    create_baseline_predictions,
+    add_movie_specific_sentiment,
+    create_hybrid_predictions
+)
 from src.evaluation import calculate_rmse, calculate_mae
 
 
@@ -58,18 +62,18 @@ def main():
     # Save baseline predictions
     baseline.to_csv("results/baseline_predictions.csv", index=False)
 
-    # Calculate average sentiment score
-    avg_sentiment_score = round(tweets_train["sentiment_score"].mean())
+    # Adding movie-specific sentiment scores
+    hybrid_data = add_movie_specific_sentiment(baseline, movies, tweets_train)
 
-    print("\nAverage sentiment score:")
-    print(avg_sentiment_score)
+    print("\nHybrid data preview:")
+    print(hybrid_data[["movieId", "rating", "predicted_rating", "avg_sentiment_score", "sentiment_rating"]].head())
 
     # Test hybrid model with different alpha values
     alpha_values = [0.2, 0.5, 0.8]
     hybrid_results = []
 
     for alpha in alpha_values:
-        hybrid = create_hybrid_predictions(baseline, avg_sentiment_score, alpha)
+        hybrid = create_hybrid_predictions(hybrid_data, alpha)
 
         hybrid_rmse = calculate_rmse(hybrid["rating"], hybrid["hybrid_prediction"])
         hybrid_mae = calculate_mae(hybrid["rating"], hybrid["hybrid_prediction"])
