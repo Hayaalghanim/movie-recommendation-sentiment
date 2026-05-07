@@ -23,11 +23,11 @@ This project implements a movie recommendation system that combines collaborativ
 ## Datasets
 
 ### 1. MovieLens Dataset
-Used for movie ratings and recommendation experiments.
+Used for movie ratings and recommendation experiments.<br>
 Link: https://grouplens.org/datasets/movielens/latest/
 
 ### 2. Twitter Sentiment Dataset
-Used for tweet preprocessing and sentiment label preparation.
+Used for tweet preprocessing and sentiment label preparation.<br>
 Link: https://www.kaggle.com/datasets/jp797498e/twitter-entity-sentiment-analysis
 
 ## Goal
