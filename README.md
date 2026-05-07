@@ -24,9 +24,11 @@ This project implements a movie recommendation system that combines collaborativ
 
 ### 1. MovieLens Dataset
 Used for movie ratings and recommendation experiments.
+Link: https://grouplens.org/datasets/movielens/latest/
 
 ### 2. Twitter Sentiment Dataset
 Used for tweet preprocessing and sentiment label preparation.
+Link: https://www.kaggle.com/datasets/jp797498e/twitter-entity-sentiment-analysis
 
 ## Goal
 
@@ -39,14 +41,44 @@ The current version performs:
 1. Loading movie and Twitter datasets  
 2. Cleaning tweet text  
 3. Encoding sentiment labels  
-4. Creating baseline movie rating predictions using average movie ratings  
-5. Evaluating predictions using:
+4. Creating baseline movie rating predictions using average movie ratings
+5. Generating hybrid predictions using sentiment scores  
+6. Evaluating predictions using:
    - RMSE
    - MAE
 
-## Future Extension
+## Evaluation
 
-The next version will integrate sentiment scores directly into the recommendation model to create a hybrid recommender system.
+The system is evaluated using:
+
+- **RMSE (Root Mean Square Error)** – measures prediction accuracy  
+- **MAE (Mean Absolute Error)** – measures average prediction error  
+
+Lower values indicate better performance.
+
+## Results
+
+Baseline Model:
+- RMSE: 0.8762  
+- MAE: 0.6668  
+
+Hybrid Model:
+- α = 0.2 → RMSE: 0.9100, MAE: 0.6940  
+- α = 0.5 → RMSE: 0.8895, MAE: 0.6800  
+- α = 0.8 → RMSE: 0.8783, MAE: 0.6683  
+
+The best hybrid result was achieved at α = 0.8, but it did not significantly outperform the baseline model.
+
+## Key Insight
+
+Sentiment integration had limited impact on performance.  
+This is mainly due to weak alignment between sentiment data and movie ratings.
+
+## Future Work
+
+- Use real movie-linked sentiment data (e.g., reviews instead of generic tweets)
+- Improve sentiment quality using advanced models
+- Evaluate using ranking metrics (Top-N) in addition to RMSE/MAE
 
 ## Requirements
 
@@ -64,3 +96,8 @@ The next version will integrate sentiment scores directly into the recommendatio
 2. Run the code:<br>
    ```bash
    python3 main.py
+
+## Notes
+
+The sentiment processing logic is implemented in the main pipeline for simplicity.  
+The `sentiment.py` file is included for modular structure and future extension.
